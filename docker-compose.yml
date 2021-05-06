@@ -1,0 +1,44 @@
+version: '3.3'
+services:
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'paciente_db'
+      MYSQL_ROOT_PASSWORD: 'ccpass'
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - app-network
+    #expose:
+    #  - '3306'
+  cadcov-back:
+    build: ./cadcov-back
+    container_name: cadcov-back
+    environment:
+      - DB_HOST=db
+      - DB_USERNAME=root
+      - DB_PASSWORD=ccpass
+      - DB_DATABASE=paciente_db
+      - DB_PORT=3306
+    ports:
+      - 8080:8080
+    links:
+      - db
+    depends_on:
+      - db
+    networks:
+      - app-network
+  cadcov-front:
+    build: ./cadcov-front
+    container_name: cadcov-front
+    ports:
+      - 8081:8081
+    links:
+      - cadcov-back
+networks:
+  app-network:
+    driver: bridge
